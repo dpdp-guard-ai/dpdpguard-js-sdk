@@ -1,0 +1,19 @@
+{
+  "name": "@dpdpguard/js",
+  "version": "1.0.0",
+  "description": "DPDP Guard JS core - pure HTTP client over the Consent API for web/RN-unsupported/lite integrations",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -p ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "types": "dist/index.d.ts",
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
