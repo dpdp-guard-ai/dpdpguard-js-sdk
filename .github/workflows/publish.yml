@@ -1,0 +1,51 @@
+name: Publish @dpdpguard/js
+
+# Trusted publishing (OIDC) to npm — no NPM_TOKEN secret needed, mirroring
+# dpdpbot's packages/contract/.github/workflows/publish-contract.yml.
+#
+# One-time setup required before this can succeed (not done by this workflow):
+# on npmjs.com, under @dpdpguard/js's Settings > Trusted Publisher, add
+# Publisher=GitHub Actions, Organization/user=<this repo's owner>,
+# Repository=dpdpguard-js-sdk, Workflow filename=publish.yml.
+#
+# Triggers: manually (workflow_dispatch) or by pushing a tag matching v*
+# (e.g. `git tag v0.2.0 && git push origin v0.2.0`).
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for npm's OIDC trusted-publisher exchange.
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Conformance + unit tests
+        run: npm test
+
+      # Trusted publishing requires npm >= 11.5.0; pin explicitly rather than
+      # trust whatever ships with the Node version above.
+      - name: Ensure a trusted-publishing-capable npm
+        run: npm install -g npm@latest
+
+      - name: Publish @dpdpguard/js
+        run: npm publish

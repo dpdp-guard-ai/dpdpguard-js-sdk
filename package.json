@@ -4,16 +4,29 @@
   "description": "DPDP Guard JS core - pure HTTP client over the Consent API for web/RN-unsupported/lite integrations",
   "main": "dist/index.js",
   "scripts": {
+    "generate": "node scripts/generate-schema.mjs",
+    "prebuild": "npm run generate",
+    "build": "tsc -p tsconfig.build.json",
+    "pretypecheck": "npm run generate",
+    "typecheck": "tsc --noEmit -p .",
     "test": "vitest run",
-    "build": "tsc -p ."
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
+    "@types/node": "^26.1.1",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "yaml": "^2.9.0"
+  },
+  "dependencies": {
+    "@dpdpguard/contract": "^0.1.1"
   }
 }
