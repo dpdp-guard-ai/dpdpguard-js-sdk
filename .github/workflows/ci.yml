@@ -6,6 +6,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 22 }
       - run: npm install
+      - run: npm run typecheck
+      # Runs the ADR-002 D5(a) request-canonicalization conformance suite
+      # (src/__conformance__/) against the currently-installed
+      # @dpdpguard/contract's golden vectors — required, non-optional gate.
+      - run: npm test
       - run: npm run build
