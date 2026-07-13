@@ -27,6 +27,6 @@
     "yaml": "^2.9.0"
   },
   "dependencies": {
-    "@dpdpguard/contract": "^0.1.1"
+    "@dpdpguard/contract": "^0.2.0"
   }
 }
