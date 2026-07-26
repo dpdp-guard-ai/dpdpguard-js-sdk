@@ -1,6 +1,6 @@
 {
   "name": "@dpdpguard/js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "DPDP Guard JS core - pure HTTP client over the Consent API for web/RN-unsupported/lite integrations",
   "main": "dist/index.js",
   "scripts": {
