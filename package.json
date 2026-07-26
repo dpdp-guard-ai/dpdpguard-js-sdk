@@ -2,6 +2,10 @@
   "name": "@dpdpguard/js",
   "version": "1.0.1",
   "description": "DPDP Guard JS core - pure HTTP client over the Consent API for web/RN-unsupported/lite integrations",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dpdp-guard-ai/dpdpguard-js-sdk.git"
+  },
   "main": "dist/index.js",
   "scripts": {
     "generate": "node scripts/generate-schema.mjs",
