@@ -1,4 +1,4 @@
-export const VERSION = "1.0.1";
+export const VERSION = "2.0.0";
 
 export { DpdpGuardClient, DpdpGuardApiError, canonicalizeDataTypes } from "./client.js";
 export type {

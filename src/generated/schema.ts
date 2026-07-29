@@ -2,7 +2,7 @@
 // openapi/v1.yaml. Do not hand-edit — run `npm run generate` instead.
 
 export interface ApiError {
-	/** Stable machine-readable error code (ADR-002 D2), see convex/lib/apiErrors.ts. */
+	/** Stable, machine-readable error code. */
 	code: string;
 	/** Human-readable message. */
 	error: string;
@@ -45,6 +45,34 @@ export interface Grievance {
 	dueAt: number;
 	respondedAt?: number;
 	response?: string;
+}
+
+export interface WidgetConfig {
+	organizationId: string;
+	noticeId: string;
+	notice: {
+		/** Map of language code to `{ title, body }`. */
+		content: Record<string, unknown>;
+		itemized: Array<{
+			purpose: string;
+			personalDataDescription: string;
+		}>;
+	};
+	/** Present only if the domain group has customized banner styling. */
+	bannerSettings?: Record<string, unknown>;
+}
+
+export interface CmSignalRecord {
+	"@context": string;
+	signalId: string;
+	cmRegistryId: string;
+	cmName: string;
+	principalTokenFromCm: string;
+	purposes: Array<string>;
+	signalType: "consent_given" | "consent_withdrawn" | "consent_updated" | (string & {});
+	/** Unix epoch milliseconds. */
+	receivedAt: number;
+	mappingStatus: "mapped" | "unresolved" | "duplicate" | (string & {});
 }
 
 export interface Nomination {

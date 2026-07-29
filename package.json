@@ -1,6 +1,6 @@
 {
   "name": "@dpdpguard/js",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "DPDP Guard JS core - pure HTTP client over the Consent API for web/RN-unsupported/lite integrations",
   "repository": {
     "type": "git",
@@ -31,6 +31,6 @@
     "yaml": "^2.9.0"
   },
   "dependencies": {
-    "@dpdpguard/contract": "^0.2.0"
+    "@dpdpguard/contract": "^1.0.1"
   }
 }
