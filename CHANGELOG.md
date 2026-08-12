@@ -5,6 +5,62 @@ All notable changes to `@dpdpguard/js` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-08-12
+
+### Changed
+
+- Bumped the `@dpdpguard/contract` dependency from `^1.0.1` to `^1.5.0`.
+  Per ADR-002 D3/D4, the contract's own CHANGELOG classifies every one of
+  the intervening releases (`1.1.0`, `1.2.0`, `1.3.0`, `1.4.0`, `1.5.0`) as
+  purely additive/minor — new endpoints and schemas, plus one new
+  documentation-only section (`conformance/audit-hash-spec.md`'s "Key
+  versions" section in `1.5.0`) — with no existing endpoint, field, error
+  code, or the audit-hash canonicalization/algorithm changed. None of the
+  new routes fall inside this SDK's scope (the public, unauthenticated
+  `/api/v1` surface: org lookup, notices, banner config, anonymous
+  consent) — they're org-scoped `apiKey`-authed partner/CRM routes
+  (`retention/due`, `breaches`, `cross-border/transfers`, `cm/signal`),
+  agent-surface (`/mcp/v1`) error codes, offline-consent-link minting,
+  offline capture (agent/POS/IVR), and the Consent Gate's decision/verify
+  endpoints and its new observability reads (`consent/gate/decisions`,
+  `consent/gate/alerts`). This release is a minor bump, not a forced major
+  one: unlike the `1.0.1` sync (`2.0.0`, forced major by a contract
+  `BREAKING` release), no release between `1.0.1` and `1.5.0` was
+  classified breaking.
+- Ran `npm run generate` against contract `1.5.0`'s `openapi/v1.yaml` (now
+  `2.8.0`). The regenerated `src/generated/schema.ts` is additive-only:
+  nine new generically-emitted schema interfaces appeared —
+  `ConsentGateDecision`, `ConsentGateBypassAlert`,
+  `CreateOfflineConsentLinkRequest`, `OfflineConsentLink`,
+  `OfflineCaptureSession`, `OfflineCaptureResult`, `IvrConsentArtifact`,
+  and the offline-consent-link/capture request/response shapes noted
+  above — sourced from the new `components.schemas` entries backing the
+  endpoints listed above. Nothing in `src/client.ts` references them, and
+  no new client methods were added. All four existing operation-specific
+  types this SDK uses (`GetNoticesForOrgResponse`, `GetBannerConfigResponse`,
+  `GiveConsentAnonymousRequest`, `GiveConsentAnonymousResponse`) and every
+  other previously-existing generated type are byte-identical to the prior
+  output.
+- `conformance/audit-hash-vectors.json` and `conformance/error-catalog.json`
+  are byte-identical to the prior contract version — no DPO sign-off
+  needed, and the audit-hash conformance test required no vector/content
+  changes.
+
+### Not included
+
+- None of the new `1.1.0`-`1.5.0` endpoints were added as client methods:
+  every one of them is either org-scoped-`apiKey` partner/CRM/Consent-Gate
+  surface or the `/mcp/v1` agent surface, neither of which is in scope for
+  `@dpdpguard/js` (see "Changed" above). Same treatment as `2.0.0`'s
+  `widget/config` and `cm/signal` — types are generated, no client wraps
+  them.
+
+### Verification
+
+- `npm run typecheck` — pass.
+- `npm test` (unit + audit-hash conformance) — pass, 12/12.
+- `npm run build` — pass.
+
 ## [2.0.0] - 2026-07-29
 
 ### Changed

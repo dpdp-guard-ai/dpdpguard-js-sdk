@@ -62,6 +62,29 @@ export interface WidgetConfig {
 	bannerSettings?: Record<string, unknown>;
 }
 
+export interface ConsentGateDecision {
+	/** Stable id for this decision row — usable as a de-duplication key when tailing the log. */
+	decisionId: string;
+	/** The consent record the decision was made about. */
+	consentId: string;
+	/** Which of the organization's own service API keys asked. Lets a fiduciary attribute a decision to one of its integrations. */
+	apiKeyId: string;
+	decision: "allow" | "deny" | (string & {});
+	reason: "consent_active" | "consent_withdrawn" | (string & {});
+	/** Epoch ms the decision was made. */
+	decidedAt: number;
+}
+
+export interface ConsentGateBypassAlert {
+	consentId: string;
+	/** In-window denies against this consent. */
+	denyCount: number;
+	/** Epoch ms of the earliest in-window deny. */
+	firstDeniedAt: number;
+	/** Epoch ms of the most recent in-window deny. */
+	lastDeniedAt: number;
+}
+
 export interface CmSignalRecord {
 	"@context": string;
 	signalId: string;
@@ -80,6 +103,83 @@ export interface Nomination {
 	nomineeName: string;
 	nomineeContact: string;
 	status: "active" | "revoked" | (string & {});
+}
+
+export interface CreateOfflineConsentLinkRequest {
+	/** Convex document id of a *published* `notices` row. */
+	noticeId: string;
+	purpose: string;
+	dataTypes: Array<string>;
+	/** Free-text identifier for where this link/QR code is deployed (e.g. "Mumbai Branch — Counter 3"). Shown back to staff only, never to the data principal. */
+	label?: string;
+}
+
+export interface OfflineConsentLink {
+	linkId: string;
+	/** Opaque token that resolves at `/offline-consent/{token}` on the fiduciary's own dpdpbot app origin. */
+	token: string;
+}
+
+export interface OfflineCaptureSession {
+	/** Client-generated UUIDv4 and the idempotency key. Re-syncing a session that already committed is a no-op. */
+	clientSessionId: string;
+	/** The enrolled `agentDevices` row whose key signed this. */
+	deviceId: string;
+	noticeId: string;
+	/** Quarantined as `notice_superseded` if the notice has since moved on — a consent must not rest on text the principal never saw. */
+	noticeVersion: number;
+	/** Eighth Schedule locale actually rendered. Inside the signature, because s. 5(3) evidence is about which language was read. */
+	noticeLocale: string;
+	channel: "qr" | "agent_app" | "pos" | "async_link" | "ivr" | (string & {});
+	/** Device clock at capture. Recorded verbatim but never used for arithmetic; skew beyond 7 days quarantines as `clock_skew`. */
+	capturedAtClient: number;
+	/** base64 of the raw IEEE-P1363 r||s ECDSA P-256 signature. */
+	deviceSignature: string;
+	dataTypes: Array<string>;
+	/** Every purpose the principal was *shown*, opted in or out. Declined purposes are submitted too: proving someone was shown marketing and refused is what distinguishes granular consent from a notice that quietly omitted it. */
+	purposeGrants: Array<{
+		purposeKey: string;
+		purposeLabel: string;
+		category: "essential" | "non_essential" | (string & {});
+		status: "opt_in" | "opt_out" | (string & {});
+	}>;
+	/** The identity handle the principal can later withdraw by. Signed raw; a `phone_hash` value is HMAC'd per-organization server-side and the raw number is never persisted. */
+	principalHandle?: {
+		kind: "phone_hash" | "uhid" | "cbs_ref" | "none" | (string & {});
+		value: string;
+	};
+	/** Set for QR-originated captures only. */
+	linkId?: string;
+}
+
+export interface OfflineCaptureResult {
+	clientSessionId: string;
+	status: "verified" | "quarantined" | "rejected" | (string & {});
+	consentId?: string;
+	/** Present for a non-verified session — `unknown_device`, `device_revoked`, `signature_mismatch`, `clock_skew`, `notice_unpublished`, `notice_superseded`, or `invalid_session`. */
+	reason?: string;
+	/** Present when a consent receipt was issued. Hand this to the principal (printed slip or read out) — it is what makes the consent withdrawable under s. 6(4). */
+	withdrawalToken?: string;
+}
+
+export interface IvrConsentArtifact {
+	noticeId: string;
+	/** The partner's identifier for the call, and the idempotency key for this submission. Gateways retry on timeout as a matter of course; a resubmission with the same `partnerCallId` returns the original artefact rather than materialising a second consent for one conversation. */
+	partnerCallId: string;
+	/** Required. The recording is the affirmative-action evidence and is stored as an immutable artefact. */
+	audioRecordingUri: string;
+	transcript?: string;
+	/** Rejected if the notice has no content for this locale. */
+	locale: string;
+	/** A sequence beginning with `1` is acceptance; anything else is a refusal. */
+	dtmfSequence: string;
+	/** Hashed by the partner; dpdpbot never receives the number. */
+	callerNumberHash: string;
+	capturedAt: number;
+	/** Retained verbatim as an assertion of origin. dpdpbot does not hold the partner's key and does not claim to verify it. */
+	partnerSignature: string;
+	purpose: string;
+	dataTypes: Array<string>;
 }
 
 export interface RecordConsentRequest {
