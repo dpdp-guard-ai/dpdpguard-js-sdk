@@ -60,6 +60,16 @@ export interface WidgetConfig {
 	};
 	/** Present only if the domain group has customized banner styling. */
 	bannerSettings?: Record<string, unknown>;
+	/** Absolute URL of the org's data-principal portal, or null. */
+	portalUrl?: string | null;
+	/** Version of the notice being presented; the widget stores it with the visitor's decision and re-prompts when it changes. */
+	noticeVersion?: number;
+	noticeSourceLanguage?: string;
+	/** The grievance contact the notice must name, or null. */
+	grievanceContact?: {
+		name?: string;
+		email?: string;
+	} | null;
 }
 
 export interface ConsentGateDecision {
@@ -209,6 +219,52 @@ export interface LegacyConsentManagerError {
 	error: string;
 }
 
+export interface ObservatoryObservation {
+	/** Re-normalized server-side on receipt — do not rely on this being echoed back verbatim. */
+	domain: string;
+	pageType: "home" | "listing" | "product" | "article" | "auth" | "checkout" | "account" | "form" | "policy" | "other" | (string & {});
+	phase: "pre_interaction" | "post_accept" | "post_reject" | "no_action" | (string & {});
+	source: "extension" | "probe" | "seed_crawl" | (string & {});
+	/** Epoch milliseconds. */
+	observedAt: number;
+	rulesetVersion: string;
+	/** Rotating, salted hash of an extension-local install id. Absent for `source: probe`. */
+	contributorHash?: string;
+	cookies?: Array<{
+		name: string;
+		party: "first" | "third" | (string & {});
+		expiryClass: "session" | "lt_24h" | "lt_30d" | "lt_13mo" | "gt_13mo" | (string & {});
+	}>;
+	storageKeys?: Array<string>;
+	requestHosts?: Array<string>;
+	cmp?: string;
+	bannerFingerprint?: string;
+}
+
+export interface ObservatoryDomainVerdict {
+	domain: string;
+	rubricVersion: string;
+	/** 0..100, excluding advisory checks. */
+	score: number;
+	grade: "A" | "B" | "C" | "D" | "E" | "insufficient_data" | (string & {});
+	checkResults: Array<{
+		checkKey: string;
+		status: "pass" | "fail" | "insufficient_data" | (string & {});
+		weight: number;
+		confidence: number;
+	}>;
+	/** Epoch milliseconds. */
+	computedAt: number;
+	/** Epoch milliseconds; past this the verdict is due a recompute. */
+	staleAfter: number;
+	/** Whether this domain itself runs dpdpbot's own consent banner (docs/specs/consent-observatory-extension.md §14, "Reciprocal loop"). Always populated, with `verified: false` when it does not; the type stays nullable for backward compatibility. */
+	reciprocalBadge?: {
+		verified?: boolean;
+		/** Epoch milliseconds of the most recent observation reporting dpdpbot's own CMP, or null when `verified` is false. */
+		verifiedAt?: number | null;
+	} | null;
+}
+
 export interface GetNoticesForOrgResponse {
 	notices: Array<Notice>;
 }
@@ -224,6 +280,12 @@ export interface GiveConsentAnonymousRequest {
 	purpose: string;
 	dataTypes: Array<string>;
 	anonymousId: string;
+	/** Locale of the notice text the visitor read. */
+	noticeLocale?: string;
+	/** SHA-256 of the exact notice text presented, stored in the consent audit trail as evidence of what was shown. */
+	noticeHash?: string;
+	/** The domain group the embedded widget loaded for. Used to attribute the consent when the notice itself is org-wide (not scoped to a group); ignored when the notice is scoped, and dropped if it is not a group in this organization. */
+	domainGroupId?: string;
 }
 
 export interface GiveConsentAnonymousResponse {

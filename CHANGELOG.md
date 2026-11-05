@@ -5,6 +5,25 @@ All notable changes to `@dpdpguard/js` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-05
+
+### Changed
+
+- Bumped the `@dpdpguard/contract` dependency from `^1.5.0` to `^1.9.0` and
+  regenerated `src/generated/schema.ts` against OpenAPI `2.23.1`. Every
+  contract release since `1.5.0` (`1.6.0`, `1.9.0`; `1.7.0`/`1.8.0` were never
+  published) is additive/minor: no error-catalog, audit-hash or
+  capture-artifact vector changes.
+- Regenerated types are additive: new optional `WidgetConfig` fields
+  (`portalUrl`, `noticeVersion`, `noticeSourceLanguage`, `grievanceContact`)
+  plus the `ObservatoryObservation` / `ObservatoryDomainVerdict` schemas.
+  No client methods were added; the new endpoints are outside this SDK's
+  public-unauthenticated scope.
+
+### Verification
+
+- `npm run typecheck`, `npm test` (12/12) and `npm run build` pass.
+
 ## [2.1.0] - 2026-08-12
 
 ### Changed
